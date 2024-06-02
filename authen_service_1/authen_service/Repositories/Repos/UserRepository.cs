@@ -5,6 +5,7 @@ using authen_service.Helpers;
 using authen_service.Models;
 using authen_service.Repositories.IRepo;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using TestHarmonyAT.Repositories.Base;
 
 namespace authen_service.Repositories.Repo
@@ -16,31 +17,7 @@ namespace authen_service.Repositories.Repo
         }
 
 
-        public async Task<bool> IsUserValid(UserSignupDto userSignUp)
-        {
-            try
-            {
-                if(userSignUp.RePassword != userSignUp.Password)
-                {
-                    return false;
-                }
-                string email = userSignUp.Email;
-                User? userExist = await _context.user.Where(user => user.Email == email).FirstOrDefaultAsync();
-                if (userExist != null)
-                {
-                    return false;
-                }
-                if (InvalidString.IsInvalidPassword(userSignUp.Password))
-                {
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
+
         public async Task<bool> IsEmailExist(string email)
         {
             try
@@ -58,11 +35,11 @@ namespace authen_service.Repositories.Repo
             }
         }
 
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> FindUserByEmail(string email)
         {
             try
             {
-                return await _context.user.Where(user => user.Email == email).FirstAsync();
+                return await _context.user.Where(user => user.Email == email).FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
@@ -74,8 +51,8 @@ namespace authen_service.Repositories.Repo
         {
             try
             {
-                User user = await _context.user.Where(user => user.Email == resetPassword.Email).FirstAsync();
-                if (resetPassword.RePassword != resetPassword.Password)
+                User? user = await _context.user.Where(user => user.Email == resetPassword.Email).FirstOrDefaultAsync();
+                if(user == null)
                 {
                     return false;
                 }
@@ -109,16 +86,21 @@ namespace authen_service.Repositories.Repo
             }
         }
 
-        public async Task<Boolean> IsCodeUnExpired(VerifyVerificationCodeRequest request)
+        public async Task<String> IsCodeUnExpired(VerifyVerificationCodeRequest request)
         {
             try
             {
                 User user = await _context.user.Where(user => user.Email == request.Email).FirstAsync();
-                if(user.VerifyCode == request.Code && user.TimeSendCode > DateTime.UtcNow.AddMinutes(-15)) 
+                if(user.VerifyCode != request.Code ) 
                 {
-                    return true;
+                    return "The code you enter is wrong";
                 }
-                return false;
+                if (user.TimeSendCode < DateTime.UtcNow.AddMinutes(-15))
+                {
+                    return "The code you enter is expired";
+                }
+                return "";
+                
             }
             catch(Exception ex)
             {

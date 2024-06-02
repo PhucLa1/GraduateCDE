@@ -8,7 +8,6 @@ namespace authen_service.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]
-    [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -26,15 +25,15 @@ namespace authen_service.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    return BadRequest(ApiResponse<Boolean>.Failed(ModelState));
                 }
-                String token = await _authService.SignUp(userSignUp);
-                if (token == "")
+                ApiResponse<String> isSuccess = await _authService.SignUp(userSignUp);
+                if (isSuccess.StatusCode != 200)
                 {
-                    return BadRequest(ApiResponse<Boolean>.Failed("Sign up not successfully"));
+                    return BadRequest(isSuccess);
                 }
-                SetJWT(token);
-                return Ok(ApiResponse<Boolean?>.Success(null, "Sign up successfully"));
+                SetJWT(isSuccess.Metadata);
+                return Ok(isSuccess);
             }catch (Exception ex)
             {
                 throw new Exception(ex.Message);
@@ -44,21 +43,21 @@ namespace authen_service.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<ApiResponse<Boolean>>> Login([FromForm] UserLoginDto userLogin)
+        public async Task<ActionResult<ApiResponse<String>>> Login([FromForm] UserLoginDto userLogin)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    return BadRequest(ApiResponse<Boolean>.Failed(ModelState));
                 }
-                String token = await _authService.Login(userLogin);
-                if (token != "")
+                ApiResponse<String> isSuccess = await _authService.Login(userLogin);
+                if (isSuccess.StatusCode == 200)
                 {
-                    SetJWT(token);
-                    return Ok(ApiResponse<Boolean?>.Success(null, "Login successfully"));
+                    SetJWT(isSuccess.Metadata);
+                    return Ok(isSuccess);
                 }
-                return BadRequest(ApiResponse<Boolean>.Failed("Login failed"));
+                return BadRequest(isSuccess);
             }
             catch (Exception ex)
             {
@@ -71,12 +70,12 @@ namespace authen_service.Controllers
         {
             try
             {
-                Boolean isSuccess = await _authService.GenerateVerificationCode(email);
-                if (isSuccess)
+                ApiResponse<Boolean> isSuccess = await _authService.GenerateVerificationCode(email);
+                if (isSuccess.StatusCode == 200)
                 {
-                    return Ok(ApiResponse<Boolean?>.Success(null, "Email reset password has sent"));
+                    return Ok(isSuccess);
                 }
-                return BadRequest(ApiResponse<Boolean>.Failed("Email reset password can not be sent"));
+                return BadRequest(isSuccess);
             }
             catch(Exception ex)
             {
@@ -89,34 +88,41 @@ namespace authen_service.Controllers
         [Route("verify-code")]
         public async Task<ActionResult<ApiResponse<Boolean>>> VerifyVerificationCode([FromForm]VerifyVerificationCodeRequest request)
         {
-            Boolean isValid = await _authService.VerifyVerificationCode(request);
-            if(isValid)
+            if (!ModelState.IsValid)
             {
-                return Ok(ApiResponse<Boolean?>.Success(null, "The verify code you enter is right"));
+                return BadRequest(ApiResponse<Boolean>.Failed(ModelState));
             }
-            return BadRequest(ApiResponse<Boolean>.Failed("The verify code you enter is wrong or expired"));
+            ApiResponse<Boolean> isValid = await _authService.VerifyVerificationCode(request);
+            if(isValid.StatusCode == 200)
+            {
+                return Ok(isValid);
+            }
+            return BadRequest(isValid);
         }
 
         [HttpPost]
         [Route("reset-password")]
         public async Task<ActionResult<ApiResponse<Boolean>>> ResetPassword([FromForm]ResetPassword resetPassword)
         {
-            Boolean isValid = await _authService.UpdatePassword(resetPassword);
-            if (isValid)
+            if (!ModelState.IsValid)
             {
-                return Ok(ApiResponse<Boolean?>.Success(null, "Change password successfully"));
+                return BadRequest(ApiResponse<Boolean>.Failed(ModelState));
             }
-            return BadRequest(ApiResponse<Boolean>.Failed("Change password failed"));
+            ApiResponse<Boolean> isValid = await _authService.UpdatePassword(resetPassword);
+            if (isValid.StatusCode == 200)
+            {
+                return Ok(isValid);
+            }
+            return BadRequest(isValid);
         }
 
         [HttpPost]
         [Route("login-google")]
-        public async Task<ActionResult<ApiResponse<Boolean>>> LoginGoogle(string credential)
+        public async Task<ActionResult<ApiResponse<String>>> LoginGoogle(string credential)
         {
             try
             {
-                String token = await _authService.GoogleLogin(credential);
-                return Ok(ApiResponse<Boolean?>.Success(null, "Login successfully"));
+                return await _authService.GoogleLogin(credential);
             }catch(Exception ex)
             {
                 throw new Exception(ex.Message);
@@ -125,17 +131,17 @@ namespace authen_service.Controllers
 
         [HttpPost]
         [Route("login-facebook")]
-        public async Task<ActionResult<ApiResponse<Boolean>>> LoginFacebook(string credential)
+        public async Task<ActionResult<ApiResponse<String>>> LoginFacebook(string credential)
         {
             try
             {
-                String token = await _authService.FacebookLogin(credential);
-                if (token == "")
+                ApiResponse<String> isLogin = await _authService.FacebookLogin(credential);
+                if (isLogin.StatusCode != 200)
                 {
-                    return BadRequest(ApiResponse<Boolean>.Failed("Login facebook not successfully"));
+                    return BadRequest(isLogin);
                 }
-                SetJWT(token);
-                return Ok(ApiResponse<Boolean?>.Success(null, "Login successfully"));
+                SetJWT(isLogin.Metadata);
+                return Ok(isLogin);
             }
             catch (Exception ex)
             {

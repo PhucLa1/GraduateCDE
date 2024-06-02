@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "SNydKo69siMlZcJJOMbfmghdF4+dhkI4ec/b2DeeJXxxHugsc/VAX8TefFjM1Nmo+MUe15giWrdRNnz+BUug1Q==",
+  "dgSpecHash": "oErcLW0FcGAexgtjw6WtNNFLs7gZkhmJ8+EnJ+6Gg9dry9Y1N/vKfRgK5pU6+ft9XQQIM7POPe031g3IeGw99w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateThesisCDE\\authen_service_1\\authen_service\\authen_service.csproj",
+  "projectFilePath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateCDE\\authen_service_1\\authen_service\\authen_service.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
@@ -73,6 +73,7 @@
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.5.0\\swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.5.0\\swashbuckle.aspnetcore.swaggerui.6.5.0.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\system.codedom\\7.0.0\\system.codedom.7.0.0.nupkg.sha512",
+    "C:\\Users\\Hong Phuc\\.nuget\\packages\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\system.configuration.configurationmanager\\6.0.1\\system.configuration.configurationmanager.6.0.1.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.1\\system.diagnostics.diagnosticsource.6.0.1.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\system.drawing.common\\6.0.0\\system.drawing.common.6.0.0.nupkg.sha512",
