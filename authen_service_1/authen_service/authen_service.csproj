@@ -28,11 +28,8 @@
     <PackageReference Include="Npoi.Mapper" Version="6.2.1" />
     <PackageReference Include="ServiceStack.Interfaces" Version="8.2.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="XAct.Core.PCL" Version="0.0.5014" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 
 </Project>

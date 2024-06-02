@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateThesisCDE\\authen_service_1\\authen_service\\authen_service.csproj": {}
+    "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateCDE\\authen_service_1\\authen_service\\authen_service.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateThesisCDE\\authen_service_1\\authen_service\\authen_service.csproj": {
+    "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateCDE\\authen_service_1\\authen_service\\authen_service.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateThesisCDE\\authen_service_1\\authen_service\\authen_service.csproj",
+        "projectUniqueName": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateCDE\\authen_service_1\\authen_service\\authen_service.csproj",
         "projectName": "authen_service",
-        "projectPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateThesisCDE\\authen_service_1\\authen_service\\authen_service.csproj",
+        "projectPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateCDE\\authen_service_1\\authen_service\\authen_service.csproj",
         "packagesPath": "C:\\Users\\Hong Phuc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateThesisCDE\\authen_service_1\\authen_service\\obj\\",
+        "outputPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\GraduateCDE\\authen_service_1\\authen_service\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -102,6 +102,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
+            },
+            "System.Collections": {
+              "target": "Package",
+              "version": "[4.3.0, )"
             },
             "XAct.Core.PCL": {
               "target": "Package",

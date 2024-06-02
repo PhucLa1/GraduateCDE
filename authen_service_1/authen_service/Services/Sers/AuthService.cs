@@ -36,21 +36,31 @@ namespace authen_service.Services.Sers
             _emailSender = emailSender;
         }
 
-        public async Task<String> SignUp(UserSignupDto userSignup)
+        public async Task<ApiResponse<String>> SignUp(UserSignupDto userSignup)
         {
             try
             {
-                Boolean isUserValid = await userRepository.IsUserValid(userSignup);
-                if (isUserValid)
+                bool isUserExist = await userRepository.IsEmailExist(userSignup.Email);
+                if (userSignup.RePassword != userSignup.Password)
                 {
-                    User user = _mapper.Map<User>(userSignup);
-                    user.Password = HashString.EncodePassMD5(user.Password);
-                    await userRepository.AddAsync(user);
-                    await _unitOfWork.SaveAsync();
-                    await SendEmail(user.Email);
-                    return await JWTGenerator(user);
+                    return ApiResponse<String>.Failed("Password not compare repassword");
                 }
-                return "";
+                if (isUserExist)
+                {
+                    return ApiResponse<String>.Failed("Email has exist");
+                }
+                if (InvalidString.IsInvalidPassword(userSignup.Password))
+                {
+                    return ApiResponse<String>.Failed("Password not malformed");
+                }
+
+                User user = _mapper.Map<User>(userSignup);
+                user.Password = HashString.EncodePassMD5(user.Password);
+                await userRepository.AddAsync(user);
+                await _unitOfWork.SaveAsync();
+                await SendEmail(user.Email);
+                string token = await JWTGenerator(user);
+                return ApiResponse<String>.Success(token, "Sign up successfully");
             }
             catch (Exception ex)
             {
@@ -58,7 +68,7 @@ namespace authen_service.Services.Sers
             }
         }
 
-        public async Task<String?> FacebookLogin(string credential)
+        public async Task<ApiResponse<String>> FacebookLogin(string credential)
         {
             try
             {
@@ -70,7 +80,7 @@ namespace authen_service.Services.Sers
 
                 if (!userOBJK.Data.IsValid)
                 {
-                    return "";
+                    return ApiResponse<String>.Failed("The data not correct");
                 }
                 HttpResponseMessage meResponse = await _httpClient.GetAsync($"https://graph.facebook.com/me?fields=first_name,last_name,picture,email&access_token={credential}");
                 var userContent = await meResponse.Content.ReadAsStringAsync();
@@ -85,7 +95,8 @@ namespace authen_service.Services.Sers
                     await _unitOfWork.SaveAsync();
                     await SendEmail(user.Email);
                 }
-                return await JWTGenerator(user);
+                string token = await JWTGenerator(user);
+                return ApiResponse<String>.Success(token,"Login facebook successfully");
             }
             catch (Exception ex)
             {
@@ -93,7 +104,7 @@ namespace authen_service.Services.Sers
             }
         }
 
-        public async Task<String> GoogleLogin(string credential)
+        public async Task<ApiResponse<String>> GoogleLogin(string credential)
         {
             try
             {
@@ -108,7 +119,8 @@ namespace authen_service.Services.Sers
                     Email = payload.Email,
                     FirstName = payload.FamilyName,
                     LastName = payload.Name,
-                    Password = HashString.EncodePassMD5(payload.Email + DateTime.UtcNow.ToString())
+                    Password = HashString.EncodePassMD5(payload.Email + DateTime.UtcNow.ToString()),
+                    Avatar = payload.Picture
                 };
                 if (!isEmailExist)
                 {
@@ -116,7 +128,8 @@ namespace authen_service.Services.Sers
                     await _unitOfWork.SaveAsync();
                     await SendEmail(user.Email);
                 }
-                return await JWTGenerator(user);
+                string token = await JWTGenerator(user);
+                return ApiResponse<String>.Success(token,"Login google successfully") ;
             }
             catch (Exception ex)
             {
@@ -166,18 +179,22 @@ namespace authen_service.Services.Sers
             await _emailSender.SendEmail(emailSend);
         }
 
-        public async Task<String> Login(UserLoginDto userLoginDto)
+        public async Task<ApiResponse<String>> Login(UserLoginDto userLoginDto)
         {
             try
             {
-                Boolean isUserExist = await userRepository.IsEmailExist(userLoginDto.Email);
-                if (isUserExist)
+                User? user = await userRepository.FindUserByEmail(userLoginDto.Email);
+                if (user == null)
                 {
-                    User user = await userRepository.GetUserByEmail(userLoginDto.Email);
-                    String encrypterToken = await JWTGenerator(user);
-                    return encrypterToken;
+                    return ApiResponse<String>.Failed("Email has not exist");
                 }
-                return "";
+                if (user.Password != HashString.EncodePassMD5(userLoginDto.Password))
+                {
+                    return ApiResponse<String>.Failed("Password not correct");
+                }
+
+                string encrypterToken = await JWTGenerator(user);
+                return ApiResponse<String>.Success(encrypterToken, "Sign in successfully");
             }
             catch (Exception ex)
             {
@@ -185,13 +202,25 @@ namespace authen_service.Services.Sers
             }
         }
 
-        public async Task<Boolean> UpdatePassword(ResetPassword resetPassword)
+        public async Task<ApiResponse<Boolean>> UpdatePassword(ResetPassword resetPassword)
         {
             try
             {
+                if(resetPassword.Password != resetPassword.RePassword)
+                {
+                    return ApiResponse<Boolean>.Failed("Password not compare repassword");
+                }
+                if (InvalidString.IsInvalidPassword(resetPassword.Password))
+                {
+                    return ApiResponse<Boolean>.Failed("Password not malformed");
+                }
                 Boolean isChangePassword = await userRepository.ChangePassword(resetPassword);
+                if (!isChangePassword)
+                {
+                    return ApiResponse<Boolean>.Failed("Email not correct");
+                }
                 await _unitOfWork.SaveAsync();
-                return isChangePassword;
+                return ApiResponse<Boolean>.Success(true,"Change password successfully"); ;
             }
             catch (Exception ex)
             {
@@ -199,7 +228,7 @@ namespace authen_service.Services.Sers
             }
         }
 
-        public async Task<Boolean> GenerateVerificationCode(string email)
+        public async Task<ApiResponse<Boolean>> GenerateVerificationCode(string email)
         {
             try
             {
@@ -221,27 +250,29 @@ namespace authen_service.Services.Sers
                     };
                     await _emailSender.SendEmail(emailSend);
                     await _unitOfWork.SaveAsync();
-                    return true;
+                    return ApiResponse<Boolean>.Success(true,"Generate verify code successfully");
                 }
 
-                return false;
-            }catch(Exception ex)
+                return ApiResponse<Boolean>.Failed("Email not exist"); ;
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
 
-        public async Task<Boolean> VerifyVerificationCode(VerifyVerificationCodeRequest verifyVerificationCodeRequest)
+        public async Task<ApiResponse<Boolean>> VerifyVerificationCode(VerifyVerificationCodeRequest verifyVerificationCodeRequest)
         {
             try
             {
-                Boolean IsCodeExpired = await userRepository.IsCodeUnExpired(verifyVerificationCodeRequest);
-                if (IsCodeExpired)
+                String IsCodeUnExpired = await userRepository.IsCodeUnExpired(verifyVerificationCodeRequest);
+                if (IsCodeUnExpired == "")
                 {
-                    return true;
+                    return ApiResponse<Boolean>.Success(true,"The code you enter is right");
                 }
-                return false;
-            }catch(Exception ex)
+                return ApiResponse<Boolean>.Failed(IsCodeUnExpired);
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
