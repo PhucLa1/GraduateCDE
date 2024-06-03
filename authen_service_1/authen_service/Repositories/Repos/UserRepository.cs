@@ -86,7 +86,7 @@ namespace authen_service.Repositories.Repo
             }
         }
 
-        public async Task<String> IsCodeUnExpired(VerifyVerificationCodeRequest request)
+        public async Task<String> CodeFailedMessage(VerifyVerificationCodeRequest request)
         {
             try
             {
@@ -107,5 +107,6 @@ namespace authen_service.Repositories.Repo
                 throw new Exception(ex.Message);
             }
         }
+
     }
 }

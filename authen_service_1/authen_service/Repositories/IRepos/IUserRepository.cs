@@ -13,6 +13,6 @@ namespace authen_service.Repositories.IRepo
         Task<Boolean> ChangePassword(ResetPassword resetPassword);
         Task<Boolean> UpdateCodeAndTimeSend(VerifyVerificationCodeRequest request);
 
-        Task<String> IsCodeUnExpired(VerifyVerificationCodeRequest request);
+        Task<String> CodeFailedMessage(VerifyVerificationCodeRequest request);
     }
 }
