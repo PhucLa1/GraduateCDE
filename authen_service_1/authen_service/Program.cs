@@ -14,6 +14,7 @@ using authen_service.Services.Sers;
 using authen_service.Services.ISers;
 using authen_service.UnitOfWork;
 using authen_service.EmailSend;
+using authen_service.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 //Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IUsersService, UsersService>();
+
+
 
 
 builder.Services.AddHttpContextAccessor();
@@ -77,10 +81,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Role", policy => policy.RequireClaim("Role", "1"));
-});
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -95,6 +95,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseJwtMiddleware();
 app.UseHttpsRedirection();
 app.UseCors("AllowOrigin");
 app.UseAuthentication();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using NPOI.OpenXmlFormats.Spreadsheet;
 using NPOI.SS.Formula.Functions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -32,6 +33,15 @@ namespace authen_service.Models
             {
                 Message = Message,
                 StatusCode = 400
+            };
+        }
+
+        public static ApiResponse<T> UnAuthorized()
+        {
+            return new ApiResponse<T>
+            {
+                Message = "The route login not defined",
+                StatusCode = 401
             };
         }
     }

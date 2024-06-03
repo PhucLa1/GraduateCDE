@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using XAct;
 
 namespace authen_service.Services.Sers
 {
@@ -25,8 +26,15 @@ namespace authen_service.Services.Sers
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly IEmailSender _emailSender;
+        
 
-        public AuthService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, HttpClient httpClient, IEmailSender emailSender)
+        public AuthService(IUnitOfWork unitOfWork, 
+            IMapper mapper, 
+            IConfiguration configuration, 
+            HttpClient httpClient, 
+            IEmailSender emailSender,
+            IHttpContextAccessor httpContextAccessor
+            )
         {
             _unitOfWork = unitOfWork;
             userRepository = unitOfWork.UserRepository;
@@ -59,7 +67,8 @@ namespace authen_service.Services.Sers
                 await userRepository.AddAsync(user);
                 await _unitOfWork.SaveAsync();
                 await SendEmail(user.Email);
-                string token = await JWTGenerator(user);
+                User? userAdd = await userRepository.FindUserByEmail(user.Email);
+                string token = await JWTGenerator(userAdd);
                 return ApiResponse<String>.Success(token, "Sign up successfully");
             }
             catch (Exception ex)
@@ -95,7 +104,13 @@ namespace authen_service.Services.Sers
                     await _unitOfWork.SaveAsync();
                     await SendEmail(user.Email);
                 }
-                string token = await JWTGenerator(user);
+                User? userAdd = await userRepository.FindUserByEmail(user.Email);
+                if (userAdd == null)
+                {
+                    return ApiResponse<String>.Failed("The account add is not successfully");
+                }
+                string token = await JWTGenerator(userAdd);
+
                 return ApiResponse<String>.Success(token,"Login facebook successfully");
             }
             catch (Exception ex)
@@ -128,7 +143,12 @@ namespace authen_service.Services.Sers
                     await _unitOfWork.SaveAsync();
                     await SendEmail(user.Email);
                 }
-                string token = await JWTGenerator(user);
+                User? userAdd = await userRepository.FindUserByEmail(user.Email);
+                if (userAdd == null)
+                {
+                    return ApiResponse<String>.Failed("The account add is not successfully");
+                }
+                string token = await JWTGenerator(userAdd);
                 return ApiResponse<String>.Success(token,"Login google successfully") ;
             }
             catch (Exception ex)
@@ -145,6 +165,7 @@ namespace authen_service.Services.Sers
                         new Claim(JwtRegisteredClaimNames.Name, _configuration["Jwt:Subject"]),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                        new Claim("Id", Result.Id.ToString()),
                         new Claim("Email", Result.Email),
                         new Claim("FirstName", Result.FirstName),
                         new Claim("LastName", Result.LastName),
@@ -265,17 +286,19 @@ namespace authen_service.Services.Sers
         {
             try
             {
-                String IsCodeUnExpired = await userRepository.IsCodeUnExpired(verifyVerificationCodeRequest);
-                if (IsCodeUnExpired == "")
+                String codeFailedMessage = await userRepository.CodeFailedMessage(verifyVerificationCodeRequest);
+                if (codeFailedMessage == "")
                 {
                     return ApiResponse<Boolean>.Success(true,"The code you enter is right");
                 }
-                return ApiResponse<Boolean>.Failed(IsCodeUnExpired);
+                return ApiResponse<Boolean>.Failed(codeFailedMessage);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
+
+        
     }
 }
