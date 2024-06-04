@@ -3,7 +3,6 @@ version: '3.4'
 services:
   authen_service:
     image: authenservice:dev
-    container_name: authen_service
     build:
       target: base
       labels:
@@ -14,8 +13,8 @@ services:
       - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
       - NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages
     volumes:
-      - C:\Users\Hong Phuc\Desktop\Study\GraduateThesisCDE\authen_service_1\authen_service:/app
-      - C:\Users\Hong Phuc\Desktop\Study\GraduateThesisCDE\authen_service_1\authen_service:/src
+      - C:\Users\Hong Phuc\Desktop\Study\GraduateCDE\authen_service_1\authen_service:/app
+      - C:\Users\Hong Phuc\Desktop\Study\GraduateCDE\authen_service_1\authen_service:/src
       - C:\Users\Hong Phuc\vsdbg\vs2017u5:/remote_debugger:rw
       - C:\Users\Hong Phuc\.nuget\packages\:/root/.nuget/packages:ro
       - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages:/root/.nuget/fallbackpackages:ro

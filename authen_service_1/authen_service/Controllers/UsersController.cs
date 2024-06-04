@@ -1,4 +1,6 @@
-﻿using authen_service.Dtos.UserDtos;
+﻿using authen_service.Data;
+using authen_service.Dtos.UserDtos;
+using authen_service.Entities;
 using authen_service.Models;
 using authen_service.Services.ISers;
 using Microsoft.AspNetCore.Http;
@@ -13,23 +15,53 @@ namespace authen_service.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _userService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly AuthenServiceDbContext context;
 
-        public UsersController(IUsersService userService, IHttpContextAccessor httpContextAccessor)
+        public UsersController(IUsersService userService, AuthenServiceDbContext context)
         {
             _userService = userService;
-            _httpContextAccessor = httpContextAccessor;
+            this.context = context;
         }
 
         [HttpGet]
         [Route("find-user-showing-by-id")]
         public async Task<ActionResult<ApiResponse<UserShowingDto>>> FindUserShowingDtoById()
         {
-            var userId1 = HttpContext.Items["UserId"] as string;
             ApiResponse<UserShowingDto> dataReturn = await _userService.FindUserShowingDtoById();
             if (dataReturn.StatusCode == 200)
             {
                 return Ok(dataReturn);
+            }
+            return Unauthorized(dataReturn);
+        }
+
+        [HttpGet]
+        [Route("find-user-info-by-id")]
+        public async Task<ActionResult<ApiResponse<UserInfoDto>>> FindUserInfoDtoById()
+        {
+            ApiResponse<UserInfoDto> dataReturn = await _userService.FindUserInfoDtoById();
+            if (dataReturn.StatusCode == 200)
+            {
+                return Ok(dataReturn);
+            }
+            return Unauthorized(dataReturn);
+        }
+        [HttpPut]
+        [Route("update-user-info")]
+        public async Task<ActionResult<ApiResponse<Boolean>>> UpdateUserInfo(UpdateUserDto updateUserDto)
+        {
+            ApiResponse<Boolean> dataReturn = await _userService.UpdateUserInfo(updateUserDto);
+            if (dataReturn.StatusCode == 200)
+            {
+                return Ok(dataReturn);
+            }
+            else if (dataReturn.StatusCode == 400)
+            {
+                return BadRequest(dataReturn);
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<Boolean>.Failed(ModelState));
             }
             return Unauthorized(dataReturn);
         }

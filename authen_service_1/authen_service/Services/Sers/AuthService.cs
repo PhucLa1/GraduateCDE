@@ -101,7 +101,6 @@ namespace authen_service.Services.Sers
                 {
                     user.Password = HashString.EncodePassMD5(user.Email + DateTime.UtcNow.ToString());
                     await userRepository.AddAsync(user);
-                    await _unitOfWork.SaveAsync();
                     await SendEmail(user.Email);
                 }
                 User? userAdd = await userRepository.FindUserByEmail(user.Email);
@@ -109,8 +108,10 @@ namespace authen_service.Services.Sers
                 {
                     return ApiResponse<String>.Failed("The account add is not successfully");
                 }
+                userAdd.LastAccessed = DateTime.UtcNow;
+                await userRepository.UpdateAsync(userAdd.Id, userAdd);
+                await _unitOfWork.SaveAsync();
                 string token = await JWTGenerator(userAdd);
-
                 return ApiResponse<String>.Success(token,"Login facebook successfully");
             }
             catch (Exception ex)
@@ -140,7 +141,6 @@ namespace authen_service.Services.Sers
                 if (!isEmailExist)
                 {
                     await userRepository.AddAsync(user);
-                    await _unitOfWork.SaveAsync();
                     await SendEmail(user.Email);
                 }
                 User? userAdd = await userRepository.FindUserByEmail(user.Email);
@@ -148,6 +148,9 @@ namespace authen_service.Services.Sers
                 {
                     return ApiResponse<String>.Failed("The account add is not successfully");
                 }
+                userAdd.LastAccessed = DateTime.UtcNow;
+                await userRepository.UpdateAsync(userAdd.Id, userAdd);
+                await _unitOfWork.SaveAsync();
                 string token = await JWTGenerator(userAdd);
                 return ApiResponse<String>.Success(token,"Login google successfully") ;
             }
@@ -213,7 +216,9 @@ namespace authen_service.Services.Sers
                 {
                     return ApiResponse<String>.Failed("Password not correct");
                 }
-
+                user.LastAccessed = DateTime.UtcNow;
+                await userRepository.UpdateAsync(user.Id, user);
+                await _unitOfWork.SaveAsync();
                 string encrypterToken = await JWTGenerator(user);
                 return ApiResponse<String>.Success(encrypterToken, "Sign in successfully");
             }

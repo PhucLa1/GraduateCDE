@@ -1,11 +1,13 @@
 ﻿using authen_service.Dtos.UserDtos;
 using authen_service.Entities;
+using authen_service.Helpers;
 using authen_service.Models;
 using authen_service.Repositories.IRepo;
 using authen_service.Repositories.Repo;
 using authen_service.Services.ISers;
 using authen_service.unitOfWork;
 using AutoMapper;
+using System.Reflection.Metadata;
 
 namespace authen_service.Services.Sers
 {
@@ -35,6 +37,45 @@ namespace authen_service.Services.Sers
             UserShowingDto userShowingDto = _mapper.Map<UserShowingDto>(user);
             return ApiResponse<UserShowingDto>.Success(userShowingDto, "Data return successfully");
 
+        }
+        public async Task<ApiResponse<UserInfoDto>> FindUserInfoDtoById()
+        {
+            int userId = int.Parse(_httpContextAccessor.HttpContext.Items["UserId"] as string);
+            if (userId == null)
+            {
+                return ApiResponse<UserInfoDto>.UnAuthorized();
+            }
+            User user = await userRepository.GetByIdAsync(userId);
+            UserInfoDto userInfoDto = _mapper.Map<UserInfoDto>(user);
+            return ApiResponse<UserInfoDto>.Success(userInfoDto, "Data return successfully");
+        }
+        public async Task<ApiResponse<Boolean>> UpdateUserInfo(UpdateUserDto updateUserDto)
+        {
+            int userId = int.Parse(_httpContextAccessor.HttpContext.Items["UserId"] as string);
+            if (userId == null)
+            {
+                return ApiResponse<Boolean>.UnAuthorized();
+            }
+            User user = await userRepository.GetByIdAsync(userId);
+            user.FirstName = updateUserDto.FirstName;
+            user.LastName = updateUserDto.LastName;
+            user.WorkPhoneNumber = updateUserDto.WorkPhoneNumber;
+            user.MobilePhoneNumber = updateUserDto.MobilePhoneNumber;   
+            user.LanguagePreference = updateUserDto.LanguagePreference;
+            user.JobTitle = updateUserDto.JobTitle;
+            user.Employer = updateUserDto.Employer;
+            if(updateUserDto.Avatar != null)
+            {
+                string fileName = await HandleImage.Upload(updateUserDto.Avatar);
+                if(fileName != "") 
+                {
+                    return ApiResponse<Boolean>.Failed("Can not upload the image");
+                }
+                user.Avatar = fileName;
+            }
+            await userRepository.UpdateAsync(userId, user);
+            await _unitOfWork.SaveAsync();
+            return ApiResponse<Boolean>.Success(true,"Update the info user successfully");
         }
     }
 }

@@ -1,27 +1,34 @@
 version: '3.4'
 
+networks:
+  authenservice:
+
 services:
+  authenservicedb: 
+    container_name: auth-db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "8001:1433"
+    environment:
+      - SA_PASSWORD=password@12345#
+      - ACCEPT_EULA=Y
+    networks:
+      - authenservice
   authen_service:
+    container_name: authen-service
     image: "${DOCKER_REGISTRY:-}authenservice"
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:80" # Expose port 5000 on the host and map it to port 80 in the container
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - "8002:80" # Expose port 5000 on the host and map it to port 80 in the container
     depends_on:
-      - db
-
-  db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+      - authenservicedb
     environment:
-      SA_PASSWORD: "Your_password123"
-      ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserverdata:/var/opt/mssql
-
+      - DB_HOST=authenservicedb
+      - DB_NAME=authendb
+      - DB_SA_PASSWORD=password@12345#
+    networks:
+      - authenservice
 volumes:
   sqlserverdata:

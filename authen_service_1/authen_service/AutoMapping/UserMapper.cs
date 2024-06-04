@@ -12,9 +12,12 @@ namespace authen_service.AutoMapping
         {
             CreateMap<User, UserShowingDto>()
                 .ForMember(destination => destination.FullName, opt => opt.MapFrom(src => $"{src.LastName} {src.FirstName}"));
-            CreateMap<UserSignupDto, User>();
+            CreateMap<UserSignupDto, User>()
+                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<User, UserInfoDto>();
             CreateMap<FacebookUserInfoResult, User>()
-                .ForMember(destination => destination.Avatar, opt => opt.MapFrom(src => src.FacebookPicture.Data.GetFileNameFromUrl()));
+                .ForMember(destination => destination.Avatar, opt => opt.MapFrom(src => src.FacebookPicture.Data.GetFileNameFromUrl()))
+                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
         }
     }
 }

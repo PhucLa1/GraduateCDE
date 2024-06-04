@@ -83,6 +83,19 @@ namespace authen_service.Controllers
             }
 
         }
+        [HttpDelete]
+        [Route("log-out")]
+        public async Task<ActionResult<ApiResponse<Boolean>>> SignOut()
+        {
+            try
+            {
+                DeleteJWT();
+                return Ok(ApiResponse<Boolean>.Success(true,"Sign out successfully"));
+            }catch(Exception ex) 
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         [HttpPost]
         [Route("verify-code")]
@@ -162,6 +175,11 @@ namespace authen_service.Controllers
                      IsEssential = true,
                      SameSite = SameSiteMode.None
                  });
+        }
+
+        private void DeleteJWT()
+        {
+            HttpContext.Response.Cookies.Delete("X-Access-Token");
         }
     }
 }
