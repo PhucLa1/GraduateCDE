@@ -12,8 +12,7 @@ namespace authen_service.Entities
         [Column("thumbnail")]
         public string? Thumbnail { get; set; }
         [Column("server_location")]
-        [DefaultValue("UTCCloud")]
-        public required string ServerLocation { get; set; }
+        public required string ServerLocation { get; set; } = "UTCCloud";
         [Column("start_date")]
         public DateTime StartDate { get; set; }
         [Column("end_date")]
@@ -21,12 +20,10 @@ namespace authen_service.Entities
         [Column("description")]
         public required string Description { get; set; }
         [Column("todo_permission")]
-        [DefaultValue(0)]
-        [Range(0,1)]
-        public int TodoPermission  { get; set; }
-        [Column("invite_permission")]
-        [DefaultValue(0)]
         [Range(0, 1)]
-        public int InvitePermission { get; set; }
+        public int TodoPermission { get; set; } = 0;
+        [Column("invite_permission")]
+        [Range(0, 1)]
+        public int InvitePermission { get; set; } = 0;
     }
 }

@@ -2,7 +2,6 @@ version: '3.4'
 
 services:
   authen_service:
-    container_name: authen_service
     build:
       labels:
         com.microsoft.created-by: "visual-studio"
