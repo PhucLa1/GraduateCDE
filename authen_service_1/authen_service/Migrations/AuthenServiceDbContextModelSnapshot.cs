@@ -117,11 +117,10 @@ namespace authen_service.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("description");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("end_date");
 
@@ -135,11 +134,10 @@ namespace authen_service.Migrations
                         .HasColumnName("project_name");
 
                     b.Property<string>("ServerLocation")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("server_location");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("start_date");
 

@@ -12,13 +12,13 @@ namespace authen_service.Entities
         [Column("thumbnail")]
         public string? Thumbnail { get; set; }
         [Column("server_location")]
-        public required string ServerLocation { get; set; } = "UTCCloud";
+        public string? ServerLocation { get; set; } = "UTCCloud";
         [Column("start_date")]
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
         [Column("end_date")]
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         [Column("description")]
-        public required string Description { get; set; }
+        public string? Description { get; set; }
         [Column("todo_permission")]
         [Range(0, 1)]
         public int TodoPermission { get; set; } = 0;

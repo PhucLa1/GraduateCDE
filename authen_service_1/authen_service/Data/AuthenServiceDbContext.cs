@@ -48,8 +48,8 @@ namespace authen_service.Data
         private int GetCurrentUserId()
         {
             // Assuming the user ID is stored in the claims of the current user
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
+            int userId = int.Parse(_httpContextAccessor.HttpContext.Items["UserId"] as string);
+            return userId != null ? userId : 0;
         }
         public DbSet<Group> group { get; set; }
         public DbSet<GroupUser> group_user { get; set; }
